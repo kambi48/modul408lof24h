@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lagerkunde — Lern-App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F2EC;
+  --surface: #FDFBF7;
+  --border: #DDD8CE;
+  --text: #1A1815;
+  --muted: #7A7470;
+  --accent: #2E4A3E;
+  --accent2: #C8552A;
+  --accent3: #4A6FA5;
+  --yellow: #F2C94C;
+  --green-soft: #D4E9DF;
+  --blue-soft: #D8E8F5;
+  --orange-soft: #FAE5DA;
+  --purple-soft: #EAE4F5;
+  --mono: 'DM Mono', monospace;
+  --serif: 'Fraunces', serif;
+  --sans: 'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── LAYOUT ── */
+.shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+.sidebar {
+  background: var(--accent);
+  color: white;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0;
+  overflow: hidden;
+}
+.main { padding: 2.5rem 3rem; max-width: 860px; }
+
+/* ── SIDEBAR ── */
+.logo {
+  padding: 0 1.5rem 2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 1.5rem;
+}
+.logo-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.logo-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  color: white;
+  line-height: 1.2;
+}
+.logo-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 4px;
+}
+nav { flex: 1; padding: 0 1rem; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.7);
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--sans);
+}
+.nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+.nav-item.active { background: rgba(255,255,255,0.15); color: white; font-weight: 500; }
+.nav-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.nav-item.active .nav-icon { background: var(--yellow); }
+.sidebar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  font-family: var(--mono);
+}
+
+/* ── SECTIONS ── */
+.section { display: none; animation: fadeIn 0.25s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-header { margin-bottom: 2.5rem; }
+.chapter-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+.page-title {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+.page-lead {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.7;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--mono);
+  margin-bottom: 1rem;
+}
+
+/* ── FORMULA CHIPS ── */
+.formula-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+.formula-chip {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.fc-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.fc-val { font-family: var(--mono); font-size: 13px; color: var(--text); }
+
+/* ── SLIDERS & METRICS ── */
+.slider-section { margin-bottom: 1.5rem; }
+.slider-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.slider-label { font-size: 13px; color: var(--muted); min-width: 180px; }
+.slider-row input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.slider-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.slider-val { font-family: var(--mono); font-size: 13px; font-weight: 500; min-width: 80px; text-align: right; color: var(--text); }
+
+.metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+.metric-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+.metric-val { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.metric-lbl { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.metric-box.highlight { background: var(--accent); border-color: var(--accent); }
+.metric-box.highlight .metric-val { color: white; }
+.metric-box.highlight .metric-lbl { color: rgba(255,255,255,0.65); }
+
+/* ── FLOW VIZ ── */
+.flow-viz { display: flex; align-items: center; gap: 0; margin: 1rem 0 1.5rem; flex-wrap: wrap; }
+.flow-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  text-align: center;
+  min-width: 100px;
+}
+.flow-step .fs-val { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+.flow-arrow { font-size: 14px; color: var(--muted); padding: 0 6px; }
+.flow-step.active-step { background: var(--green-soft); border-color: #A8D5C0; }
+.flow-step.deduct { background: var(--orange-soft); border-color: #F0C0A0; }
+
+/* ── REGAL DIAGRAM ── */
+.regal-wrap { margin: 1rem 0; }
+
+/* ── LAST CARDS ── */
+.last-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 1rem 0; }
+.last-card { border-radius: 10px; padding: 14px; }
+.last-card .lc-name { font-weight: 500; font-size: 13.5px; margin-bottom: 4px; }
+.last-card .lc-desc { font-size: 12px; line-height: 1.5; }
+
+/* ── REGALTYPEN TABLE ── */
+.rt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rt-table th { text-align: left; padding: 8px 12px; font-weight: 500; color: var(--muted); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
+.rt-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.rt-table tr:last-child td { border-bottom: none; }
+.rt-table tr:hover td { background: var(--bg); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-family: var(--mono); }
+
+/* ── BEGRIFFE ── */
+.begriffs-list { }
+.begriffs-item { padding: 14px 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; align-items: start; }
+.begriffs-item:last-child { border-bottom: none; }
+.b-term { font-weight: 500; font-size: 14px; }
+.b-tag { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+.b-def { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+/* ── QUIZ ── */
+.quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.score-pill { background: var(--accent); color: white; padding: 6px 16px; border-radius: 20px; font-family: var(--mono); font-size: 13px; }
+.progress-track { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 2rem; }
+.progress-fill { height: 100%; background: var(--accent2); border-radius: 2px; transition: width 0.4s ease; }
+.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 14px; }
+.q-num { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.q-text { font-size: 15px; font-weight: 500; margin-bottom: 1.25rem; line-height: 1.5; }
+.q-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.q-opt {
+  padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); cursor: pointer; font-size: 13.5px; font-family: var(--sans);
+  text-align: left; color: var(--text); transition: all 0.15s; line-height: 1.4;
+}
+.q-opt:hover:not(:disabled) { border-color: var(--accent3); background: var(--blue-soft); }
+.q-opt.correct { background: var(--green-soft); border-color: #5BAA8A; color: #1A4A35; }
+.q-opt.wrong { background: var(--orange-soft); border-color: #D07050; color: #7A2A10; }
+.q-feedback { margin-top: 12px; font-size: 13px; line-height: 1.6; display: none; }
+.q-feedback.show { display: block; }
+.q-feedback.ok { color: #1A4A35; }
+.q-feedback.no { color: #7A2A10; }
+.btn-reset {
+  padding: 8px 20px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer; font-size: 13px; font-family: var(--sans);
+  color: var(--text); transition: all 0.15s;
+}
+.btn-reset:hover { background: var(--bg); border-color: var(--accent); }
+
+/* ── WARENFLUSS ── */
+.wf-section { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 1rem 0; }
+.wf-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.wf-box .wf-title { font-weight: 500; font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.wf-dot { width: 8px; height: 8px; border-radius: 50%; }
+.wf-box p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── NUMBERING VIZ ── */
+.num-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 10px; }
+.num-example {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  margin: 12px 0 8px;
+}
+.num-block {
+  font-family: var(--mono); font-size: 18px; font-weight: 500;
+  padding: 6px 12px; border-radius: 6px;
+}
+.num-label { font-size: 11px; color: var(--muted); text-align: center; margin-top: 2px; font-family: var(--mono); }
+.num-group { text-align: center; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 1rem; }
+  .logo { padding: 0 1rem 0 0; border-bottom: none; border-right: 1px solid rgba(255,255,255,0.12); margin-bottom: 0; margin-right: 1rem; }
+  nav { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sidebar-footer { display: none; }
+  .main { padding: 1.5rem; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .formula-grid { grid-template-columns: 1fr; }
+  .last-grid { grid-template-columns: 1fr; }
+  .wf-section { grid-template-columns: 1fr; }
+  .q-opts { grid-template-columns: 1fr; }
+  .begriffs-item { grid-template-columns: 1fr; gap: 4px; }
+  .num-example { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-label">Kapitel 8</div>
+    <div class="logo-title">Lager&shy;kunde</div>
+    <div class="logo-sub">Lern-App</div>
+  </div>
+  <nav>
+    <button class="nav-item active" onclick="show('flaeche',this)">
+      <div class="nav-icon">▦</div> Flächen & Rechner
+    </button>
+    <button class="nav-item" onclick="show('raum',this)">
+      <div class="nav-icon">⬚</div> Raumnutzung
+    </button>
+    <button class="nav-item" onclick="show('regal',this)">
+      <div class="nav-icon">≡</div> Regallagerung
+    </button>
+    <button class="nav-item" onclick="show('nummern',this)">
+      <div class="nav-icon">#</div> Nummerierung
+    </button>
+    <button class="nav-item" onclick="show('warenfluss',this)">
+      <div class="nav-icon">→</div> Warenfluss
+    </button>
+    <button class="nav-item" onclick="show('begriffe',this)">
+      <div class="nav-icon">≈</div> Begriffe
+    </button>
+    <button class="nav-item" onclick="show('quiz',this)">
+      <div class="nav-icon">✓</div> Quiz
+    </button>
+  </nav>
+  <div class="sidebar-footer">8.7 – 8.12 · Logistik</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ════ FLÄCHEN ════ -->
+<div id="flaeche" class="section active">
+  <div class="page-header">
+    <span class="chapter-tag">8.7 · Flächen- und Raumnutzung</span>
+    <h1 class="page-title">Flächen­berechnung</h1>
+    <p class="page-lead">Passe die Lagermasse an — alle Kennzahlen werden sofort neu berechnet.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Parameter</div>
+    <div class="slider-section">
+      <div class="slider-row"><span class="slider-label">Länge</span><input type="range" min="20" max="150" value="65" step="1" id="laenge" oninput="calcF()"><span class="slider-val" id="laenge-out">65 m</span></div>
+      <div class="slider-row"><span class="slider-label">Breite</span><input type="range" min="10" max="100" value="45" step="1" id="breite" oninput="calcF()"><span class="slider-val" id="breite-out">45 m</span></div>
+      <div class="slider-row"><span class="slider-label">Geschosse</span><input type="range" min="1" max="5" value="1" step="1" id="geschosse" oninput="calcF()"><span class="slider-val" id="geschosse-out">1</span></div>
+      <div class="slider-row"><span class="slider-label">Nicht nutzbare Fläche</span><input type="range" min="0" max="1000" value="275" step="5" id="nichtnutzbar" oninput="calcF()"><span class="slider-val" id="nn-out">275 m²</span></div>
+      <div class="slider-row"><span class="slider-label">Verkehrswege</span><input type="range" min="0" max="2000" value="1300" step="50" id="verkehr" oninput="calcF()"><span class="slider-val" id="vk-out">1'300 m²</span></div>
+    </div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-box"><div class="metric-val" id="r-lf">2'925</div><div class="metric-lbl">Lagerfläche (m²)</div></div>
+    <div class="metric-box"><div class="metric-val" id="r-bf">2'650</div><div class="metric-lbl">Lager-Bruttofläche (m²)</div></div>
+    <div class="metric-box"><div class="metric-val" id="r-nf">1'350</div><div class="metric-lbl">Lager-Nettofläche (m²)</div></div>
+    <div class="metric-box highlight"><div class="metric-val" id="r-fng">50.9%</div><div class="metric-lbl">Flächennutzungsgrad</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Berechnungsfluss</div>
+    <div class="flow-viz" id="flow-viz">
+      <div class="flow-step active-step"><div>Lagerfläche</div><div class="fs-val" id="fv-lf">2'925 m²</div></div>
+      <div class="flow-arrow">−</div>
+      <div class="flow-step deduct"><div>Nicht nutzbar</div><div class="fs-val" id="fv-nn">275 m²</div></div>
+      <div class="flow-arrow">=</div>
+      <div class="flow-step active-step"><div>Bruttofläche</div><div class="fs-val" id="fv-bf">2'650 m²</div></div>
+      <div class="flow-arrow">−</div>
+      <div class="flow-step deduct"><div>Verkehr</div><div class="fs-val" id="fv-vk">1'300 m²</div></div>
+      <div class="flow-arrow">=</div>
+      <div class="flow-step active-step"><div>Nettofläche</div><div class="fs-val" id="fv-nf">1'350 m²</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Formeln</div>
+    <div class="formula-grid">
+      <div class="formula-chip"><div class="fc-label">Lagerfläche</div><div class="fc-val">Länge × Breite × Geschosse</div></div>
+      <div class="formula-chip"><div class="fc-label">Lager-Bruttofläche</div><div class="fc-val">Lagerfläche − nicht nutzbare Flächen</div></div>
+      <div class="formula-chip"><div class="fc-label">Lager-Nettofläche</div><div class="fc-val">Bruttofläche − Verkehrswege</div></div>
+      <div class="formula-chip"><div class="fc-label">Flächennutzungsgrad</div><div class="fc-val">(Nettofläche ÷ Bruttofläche) × 100</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RAUM ════ -->
+<div id="raum" class="section">
+  <div class="page-header">
+    <span class="chapter-tag">8.8 · Raumnutzung</span>
+    <h1 class="page-title">Raum­nutzungs­grad</h1>
+    <p class="page-lead">Zusätzlich zur Fläche wird die Raumhöhe berücksichtigt. Der Raumnutzungsgrad zeigt, wie gut das Volumen ausgenutzt wird.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Parameter</div>
+    <div class="slider-section">
+      <div class="slider-row"><span class="slider-label">Nettofläche (m²)</span><input type="range" min="100" max="5000" value="1350" step="50" id="rn" oninput="calcR()"><span class="slider-val" id="rn-out">1'350 m²</span></div>
+      <div class="slider-row"><span class="slider-label">Raumhöhe (m)</span><input type="range" min="2" max="20" value="5" step="0.5" id="rh" oninput="calcR()"><span class="slider-val" id="rh-out">5.0 m</span></div>
+      <div class="slider-row"><span class="slider-label">Ø Palettenhöhe (m)</span><input type="range" min="0.5" max="4" value="1.6" step="0.1" id="ph" oninput="calcR()"><span class="slider-val" id="ph-out">1.6 m</span></div>
+    </div>
+  </div>
+
+  <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="metric-box"><div class="metric-val" id="r-gvol">6'750</div><div class="metric-lbl">Gesamtvolumen (m³)</div></div>
+    <div class="metric-box"><div class="metric-val" id="r-nvol">2'160</div><div class="metric-lbl">Genutztes Volumen (m³)</div></div>
+    <div class="metric-box highlight"><div class="metric-val" id="r-rng">32.0%</div><div class="metric-lbl">Raumnutzungsgrad</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Formeln</div>
+    <div class="formula-grid">
+      <div class="formula-chip"><div class="fc-label">Genutztes Volumen</div><div class="fc-val">Nettofläche × Ø Palettenhöhe</div></div>
+      <div class="formula-chip"><div class="fc-label">Gesamtvolumen</div><div class="fc-val">Nettofläche × Raumhöhe</div></div>
+      <div class="formula-chip" style="grid-column:1/-1"><div class="fc-label">Raumnutzungsgrad</div><div class="fc-val">(Genutztes Volumen ÷ Gesamtvolumen) × 100</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="background: #EAF3DE; border-color: #A8D5C0;">
+    <p style="font-size:13.5px; color:#1A4A35; line-height:1.7"><strong>Merke:</strong> Der Flächennutzungsgrad gibt das Verhältnis der Nettofläche zur Bruttofläche an. Der Raumnutzungsgrad gibt zusätzlich das Verhältnis des genutzten Raums (Fläche × Höhe) zum Gesamtraum an.</p>
+  </div>
+</div>
+
+<!-- ════ REGAL ════ -->
+<div id="regal" class="section">
+  <div class="page-header">
+    <span class="chapter-tag">8.9 · Regallagerung</span>
+    <h1 class="page-title">Regal­lagerung</h1>
+    <p class="page-lead">Die häufigste Lagerform. Höhere Investitionskosten werden durch bessere Raumausnutzung wettgemacht.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Aufbau Palettenregal</div>
+    <svg viewBox="0 0 500 200" width="100%" style="max-height:190px;display:block;margin:8px 0 12px">
+      <rect x="40" y="15" width="10" height="175" fill="#B4B2A9" rx="3"/>
+      <rect x="200" y="15" width="10" height="175" fill="#B4B2A9" rx="3"/>
+      <rect x="360" y="15" width="10" height="175" fill="#B4B2A9" rx="3"/>
+      <rect x="490" y="15" width="10" height="175" fill="#B4B2A9" rx="3"/>
+      <rect x="40" y="35" width="170" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="210" y="35" width="160" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="370" y="35" width="130" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="40" y="100" width="170" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="210" y="100" width="160" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="370" y="100" width="130" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="40" y="165" width="170" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="210" y="165" width="160" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="370" y="165" width="130" height="7" fill="#EF9F27" rx="2"/>
+      <rect x="50" y="43" width="70" height="50" fill="#D8E8F5" rx="3" stroke="#A0C0E0" stroke-width="0.5"/>
+      <rect x="130" y="43" width="70" height="50" fill="#D8E8F5" rx="3" stroke="#A0C0E0" stroke-width="0.5"/>
+      <rect x="220" y="43" width="70" height="50" fill="#D8E8F5" rx="3" stroke="#A0C0E0" stroke-width="0.5"/>
+      <rect x="300" y="43" width="60" height="50" fill="#D8E8F5" rx="3" stroke="#A0C0E0" stroke-width="0.5"/>
+      <rect x="380" y="43" width="60" height="50" fill="#D8E8F5" rx="3" stroke="#A0C0E0" stroke-width="0.5"/>
+      <rect x="440" y="43" width="50" height="50" fill="#D8E8F5" rx="3" stroke="#A0C0E0" stroke-width="0.5"/>
+      <rect x="50" y="108" width="70" height="50" fill="#D4E9DF" rx="3" stroke="#90C0A8" stroke-width="0.5"/>
+      <rect x="130" y="108" width="70" height="50" fill="#D4E9DF" rx="3" stroke="#90C0A8" stroke-width="0.5"/>
+      <rect x="220" y="108" width="70" height="50" fill="#D4E9DF" rx="3" stroke="#90C0A8" stroke-width="0.5"/>
+      <rect x="300" y="108" width="60" height="50" fill="#D4E9DF" rx="3" stroke="#90C0A8" stroke-width="0.5"/>
+      <rect x="380" y="108" width="60" height="50" fill="#D4E9DF" rx="3" stroke="#90C0A8" stroke-width="0.5"/>
+      <rect x="440" y="108" width="50" height="50" fill="#D4E9DF" rx="3" stroke="#90C0A8" stroke-width="0.5"/>
+      <text x="85" y="73" text-anchor="middle" font-size="9" fill="#185FA5" font-family="monospace">2. Ebene</text>
+      <text x="85" y="138" text-anchor="middle" font-size="9" fill="#0F6E56" font-family="monospace">1. Ebene</text>
+      <text x="85" y="192" text-anchor="middle" font-size="9" fill="#7A7470" font-family="monospace">Bodenplätze</text>
+      <line x1="10" y1="35" x2="10" y2="42" stroke="#7A7470" stroke-width="1"/>
+      <line x1="10" y1="35" x2="40" y2="35" stroke="#7A7470" stroke-width="0.75" stroke-dasharray="3,2"/>
+      <text x="8" y="32" font-size="8" fill="#7A7470" font-family="monospace" text-anchor="end">Traverse</text>
+      <line x1="40" y1="8" x2="40" y2="14" stroke="#7A7470" stroke-width="1"/>
+      <text x="40" y="6" font-size="8" fill="#7A7470" font-family="monospace" text-anchor="middle">Ständer</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Lasttypen</div>
+    <div class="last-grid">
+      <div class="last-card" style="background:var(--blue-soft);border:1px solid #A0C0E0">
+        <div class="lc-name" style="color:#185FA5">Fachlast</div>
+        <div class="lc-desc" style="color:#0C447C">Gesamte Last in einem einzelnen Regalfach.</div>
+      </div>
+      <div class="last-card" style="background:var(--purple-soft);border:1px solid #C0B0E8">
+        <div class="lc-name" style="color:#534AB7">Feldlast</div>
+        <div class="lc-desc" style="color:#3C3489">Summe aller Fachlasten in einem Regalfeld (zwischen zwei Ständerprofilen).</div>
+      </div>
+      <div class="last-card" style="background:var(--green-soft);border:1px solid #90C0A8">
+        <div class="lc-name" style="color:#0F6E56">Regallast</div>
+        <div class="lc-desc" style="color:#085041">Summe aller Feldlasten in einer gesamten Regalzeile.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Regaltypen nach Kriterien</div>
+    <table class="rt-table">
+      <thead><tr><th>Kriterium</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Höhe</strong></td><td>Bis 7 m: Flachregallager · Ab 5,5 m: Lagersystem (Fachplanung nötig) · Bis 45 m: Hochregal</td></tr>
+        <tr><td><strong>Tiefe</strong></td><td>1 100 mm für Längslagerung · 750 mm für Querlagerung</td></tr>
+        <tr><td><strong>Traversenlänge</strong></td><td>Standard 2 700 mm · Überhang max. 50 mm · grössere Paletten → längere Traversen</td></tr>
+        <tr><td><strong>Traglast</strong></td><td>Standard bis 10 000 kg Feldlast · Schwerlastregale für höhere Lasten (verstärkte Träger + Verschraubung)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="background:#FAE5DA;border-color:#F0C0A0">
+    <p style="font-size:13.5px;color:#7A2A10;line-height:1.7"><strong>Bodenbelastung:</strong> Beim Regal konzentriert sich die Last auf die kleinen Stützflächen (~100 cm²). Diese punktuelle Belastung kann bis zu 7 Tonnen betragen und muss bei der Bodenbeschaffenheit unbedingt berücksichtigt werden.</p>
+  </div>
+</div>
+
+<!-- ════ NUMMERIERUNG ════ -->
+<div id="nummern" class="section">
+  <div class="page-header">
+    <span class="chapter-tag">8.10 · 8.11 · Nummerierung</span>
+    <h1 class="page-title">Artikel- & Lagerplatz­nummerierung</h1>
+    <p class="page-lead">Eindeutige Nummern ermöglichen das Identifizieren, Klassifizieren, Informieren und Kontrollieren von Gütern und Lagerorten.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Zwecke der Artikelnummerierung</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <div style="padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-weight:500;font-size:13px;margin-bottom:4px">Identifizieren</div>
+        <div style="font-size:12.5px;color:var(--muted)">Jeder Artikel erhält eine eindeutige, einmalige Nummer (Primärschlüssel in Datenbanken).</div>
+      </div>
+      <div style="padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-weight:500;font-size:13px;margin-bottom:4px">Klassifizieren</div>
+        <div style="font-size:12.5px;color:var(--muted)">Nummern können Merkmal-Gruppen codieren (z.B. Hersteller, Artikelgruppe).</div>
+      </div>
+      <div style="padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-weight:500;font-size:13px;margin-bottom:4px">Informieren</div>
+        <div style="font-size:12.5px;color:var(--muted)">Die Nummer selbst enthält Informationen (z.B. 1122 = November, 2. Woche).</div>
+      </div>
+      <div style="padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-weight:500;font-size:13px;margin-bottom:4px">Kontrollieren</div>
+        <div style="font-size:12.5px;color:var(--muted)">Systemgestützte Prüfung und Nachverfolgung von Beständen und Bewegungen.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="num-card">
+    <div class="card-title">Lagerplatznummerierung — zwei Varianten</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Das System entspricht einem Quartier: Regale = Häuser, Gänge = Strassen, Ebenen = Stockwerke, Stellplätze = Wohnungen.</p>
+
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:12px;font-weight:500;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Variante 1 — Regal · Ebene · Stellplatz</div>
+      <div class="num-example">
+        <div class="num-group"><div class="num-block" style="background:var(--accent);color:white">12</div><div class="num-label">Regal</div></div>
+        <div style="font-family:var(--mono);font-size:20px;color:var(--muted);padding-top:6px">·</div>
+        <div class="num-group"><div class="num-block" style="background:var(--accent3);color:white">03</div><div class="num-label">Ebene</div></div>
+        <div style="font-family:var(--mono);font-size:20px;color:var(--muted);padding-top:6px">·</div>
+        <div class="num-group"><div class="num-block" style="background:var(--accent2);color:white">11</div><div class="num-label">Stellplatz</div></div>
+        <div style="padding-top:6px;font-family:var(--mono);font-size:13px;color:var(--muted)">→ 120311</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:12px;font-weight:500;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Variante 2 — Regal · Stellplatz · Ebene</div>
+      <div class="num-example">
+        <div class="num-group"><div class="num-block" style="background:var(--accent);color:white">12</div><div class="num-label">Regal</div></div>
+        <div style="font-family:var(--mono);font-size:20px;color:var(--muted);padding-top:6px">·</div>
+        <div class="num-group"><div class="num-block" style="background:var(--accent2);color:white">11</div><div class="num-label">Stellplatz</div></div>
+        <div style="font-family:var(--mono);font-size:20px;color:var(--muted);padding-top:6px">·</div>
+        <div class="num-group"><div class="num-block" style="background:var(--accent3);color:white">03</div><div class="num-label">Ebene</div></div>
+        <div style="padding-top:6px;font-family:var(--mono);font-size:13px;color:var(--muted)">→ 121103</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WARENFLUSS ════ -->
+<div id="warenfluss" class="section">
+  <div class="page-header">
+    <span class="chapter-tag">8.12 · Warenfluss</span>
+    <h1 class="page-title">Warenfluss im Lagerbetrieb</h1>
+    <p class="page-lead">Es wird zwischen aussen- und innerbetrieblichem Warenfluss unterschieden.</p>
+  </div>
+
+  <div class="wf-section">
+    <div class="wf-box">
+      <div class="wf-title"><div class="wf-dot" style="background:#C8552A"></div>Ausserbetrieblicher Warenfluss</div>
+      <p>Materialfluss zwischen Unternehmen und Lieferanten oder Kunden über Strassen, Schienen, Wasser oder Luft (Fahrzeuge, Bahn, Schiff, Flugzeug usw.).</p>
+    </div>
+    <div class="wf-box">
+      <div class="wf-title"><div class="wf-dot" style="background:#2E4A3E"></div>Innerbetrieblicher Warenfluss</div>
+      <p>Bewegung von Waren innerhalb des Unternehmens — z.B. vom Wareneingang ins Lager und weiter zum Versand oder zur Produktion.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Typischer innerbetrieblicher Ablauf</div>
+    <div class="flow-viz" style="flex-wrap:wrap;gap:6px">
+      <div class="flow-step active-step" style="min-width:90px;font-size:12px">Wareneingang</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step" style="min-width:90px;font-size:12px">Kontrolle / Prüfung</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step" style="min-width:90px;font-size:12px">Einlagerung</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step" style="min-width:90px;font-size:12px">Lagerung</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step" style="min-width:90px;font-size:12px">Kommissionierung</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step" style="min-width:90px;font-size:12px">Warenausgang</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ BEGRIFFE ════ -->
+<div id="begriffe" class="section">
+  <div class="page-header">
+    <span class="chapter-tag">Glossar</span>
+    <h1 class="page-title">Begriffe</h1>
+    <p class="page-lead">Alle wichtigen Fachbegriffe aus Kapitel 8 auf einen Blick.</p>
+  </div>
+  <div class="card">
+    <div class="begriffs-list">
+      <div class="begriffs-item"><div><div class="b-term">Lagerfläche</div><div class="b-tag">8.7.1</div></div><div class="b-def">Gesamtfläche des Lagergebäudes: Länge × Breite × Anzahl Geschosse.</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Lager-Bruttofläche</div><div class="b-tag">8.7.2</div></div><div class="b-def">Lagerfläche abzüglich aller nicht nutzbaren Flächen (Stützen, WC, Garderobe, Büros, Beladezone usw.).</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Lager-Nettofläche</div><div class="b-tag">8.7.3</div></div><div class="b-def">Bruttofläche abzüglich Verkehrswege — die tatsächlich für Lagergut nutzbare Bodenfläche.</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Flächennutzungsgrad</div><div class="b-tag">8.7.4</div></div><div class="b-def">(Nettofläche ÷ Bruttofläche) × 100. Gibt die Auslastung der Lagerfläche in Prozent an.</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Raumnutzungsgrad</div><div class="b-tag">8.8</div></div><div class="b-def">(Genutztes Volumen ÷ Gesamtvolumen) × 100. Bezieht zusätzlich die Raumhöhe ein.</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Fachlast</div><div class="b-tag">8.9.1</div></div><div class="b-def">Gesamte Last, die in ein einzelnes Regalfach eingelagert wird.</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Feldlast</div><div class="b-tag">8.9.1</div></div><div class="b-def">Summe aller Fachlasten in einem Regalfeld (Bereich zwischen zwei Ständerprofilen).</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Regallast</div><div class="b-tag">8.9.1</div></div><div class="b-def">Summe aller Feldlasten entlang einer gesamten Regalzeile.</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Bodenplätze</div><div class="b-tag">8.9</div></div><div class="b-def">Palettenplätze direkt auf dem Boden, unterhalb der ersten Traverse.</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Artikelnummerierung</div><div class="b-tag">8.10</div></div><div class="b-def">Vergabe eindeutiger Nummern: identifizieren, klassifizieren, informieren, kontrollieren.</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Lagerplatznummerierung</div><div class="b-tag">8.11</div></div><div class="b-def">System zur eindeutigen Adressierung jedes Stellplatzes (Regal-Nr., Regalebene, Stellplatz).</div></div>
+      <div class="begriffs-item"><div><div class="b-term">Warenfluss</div><div class="b-tag">8.12</div></div><div class="b-def">Unterscheidung zwischen aussen- (Lieferanten/Kunden) und innerbetrieblichem (im Betrieb) Warenfluss.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div id="quiz" class="section">
+  <div class="page-header">
+    <span class="chapter-tag">Lernkontrolle</span>
+    <h1 class="page-title">Quiz</h1>
+    <p class="page-lead">Teste dein Wissen zu Kapitel 8.</p>
+  </div>
+  <div class="quiz-header">
+    <div class="score-pill">Punkte: <span id="score">0</span> / 7</div>
+    <button class="btn-reset" onclick="resetQuiz()">Neu starten</button>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="qprog" style="width:0%"></div></div>
+  <div id="quiz-wrap"></div>
+</div>
+
+</main>
+</div>
+
+<script>
+// ── NAV ──
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── FLÄCHEN RECHNER ──
+function fmt(n) { return Math.round(n).toLocaleString('de-CH'); }
+function calcF() {
+  const l = +document.getElementById('laenge').value;
+  const b = +document.getElementById('breite').value;
+  const g = +document.getElementById('geschosse').value;
+  const nn = +document.getElementById('nichtnutzbar').value;
+  const vk = +document.getElementById('verkehr').value;
+  document.getElementById('laenge-out').textContent = l + ' m';
+  document.getElementById('breite-out').textContent = b + ' m';
+  document.getElementById('geschosse-out').textContent = g;
+  document.getElementById('nn-out').textContent = fmt(nn) + ' m²';
+  document.getElementById('vk-out').textContent = fmt(vk) + ' m²';
+  const lf = l * b * g;
+  const bf = Math.max(0, lf - nn);
+  const nf = Math.max(0, bf - vk);
+  const fng = bf > 0 ? (nf / bf * 100) : 0;
+  document.getElementById('r-lf').textContent = fmt(lf);
+  document.getElementById('r-bf').textContent = fmt(bf);
+  document.getElementById('r-nf').textContent = fmt(nf);
+  document.getElementById('r-fng').textContent = fng.toFixed(1) + '%';
+  document.getElementById('fv-lf').textContent = fmt(lf) + ' m²';
+  document.getElementById('fv-nn').textContent = fmt(nn) + ' m²';
+  document.getElementById('fv-bf').textContent = fmt(bf) + ' m²';
+  document.getElementById('fv-vk').textContent = fmt(vk) + ' m²';
+  document.getElementById('fv-nf').textContent = fmt(nf) + ' m²';
+}
+
+// ── RAUM RECHNER ──
+function calcR() {
+  const nf = +document.getElementById('rn').value;
+  const rh = +document.getElementById('rh').value;
+  const ph = +document.getElementById('ph').value;
+  document.getElementById('rn-out').textContent = fmt(nf) + ' m²';
+  document.getElementById('rh-out').textContent = rh.toFixed(1) + ' m';
+  document.getElementById('ph-out').textContent = ph.toFixed(1) + ' m';
+  const gvol = nf * rh;
+  const nvol = nf * ph;
+  const rng = gvol > 0 ? (nvol / gvol * 100) : 0;
+  document.getElementById('r-gvol').textContent = fmt(gvol);
+  document.getElementById('r-nvol').textContent = fmt(nvol);
+  document.getElementById('r-rng').textContent = rng.toFixed(1) + '%';
+}
+
+// ── QUIZ ──
+const questions = [
+  {q:"Was ist die Lager-Bruttofläche?", opts:["Lagerfläche minus Verkehrswege","Lagerfläche minus nicht nutzbare Flächen","Nettofläche mal Raumhöhe","Länge mal Breite mal Geschosse"],c:1,exp:"Bruttofläche = Lagerfläche − nicht nutzbare Flächen (Stützen, WC, Büros, Garderobe usw.)."},
+  {q:"Wie lautet die Formel für den Flächennutzungsgrad?", opts:["(Bruttofläche ÷ Lagerfläche) × 100","(Nettofläche ÷ Bruttofläche) × 100","(Verkehrswege ÷ Nettofläche) × 100","(Nettofläche ÷ Lagerfläche) × 100"],c:1,exp:"Flächennutzungsgrad = (Nettofläche ÷ Bruttofläche) × 100."},
+  {q:"Ein Lager hat eine Bruttofläche von 2'650 m². Die Verkehrswege betragen 1'300 m². Wie gross ist die Nettofläche?", opts:["2'925 m²","2'650 m²","1'350 m²","1'300 m²"],c:2,exp:"Nettofläche = Bruttofläche − Verkehrswege = 2'650 m² − 1'300 m² = 1'350 m²."},
+  {q:"Was versteht man unter Feldlast?", opts:["Last in einem einzelnen Regalfach","Summe der Fachlasten in einem Regalfeld","Summe aller Feldlasten in einer Regalzeile","Bodenbelastung unter den Stützen"],c:1,exp:"Feldlast = Summe aller Fachlasten in einem Regalfeld (zwischen zwei Ständerprofilen)."},
+  {q:"Ab welcher Höhe gehören Regalanlagen bereits zu Lagersystemen?", opts:["Ab 3 m","Ab 5,5 m","Ab 7 m","Ab 10 m"],c:1,exp:"Ab 5,5 m Höhe = Lagersystem (Fachplanung nötig). Bis 7 m = noch Flachregallager."},
+  {q:"Ein Lager hat eine Nettofläche von 1'350 m², eine Raumhöhe von 5 m und eine durchschn. Palettenhöhe von 1,6 m. Wie hoch ist der Raumnutzungsgrad?", opts:["50,94 %","32 %","20 %","16 %"],c:1,exp:"Genutztes Vol. = 1'350 × 1,6 = 2'160 m³ · Gesamt = 1'350 × 5 = 6'750 m³ → 2'160 ÷ 6'750 × 100 = 32 %."},
+  {q:"Was bezeichnet Regallast?", opts:["Last pro Palette","Summe aller Fachlasten eines Fachs","Summe aller Feldlasten in einer Regalzeile","Bodenbelastung unter dem Regal"],c:2,exp:"Regallast = Summe aller Feldlasten in einer gesamten Regalzeile."},
+];
+
+let scores = new Array(questions.length).fill(null);
+
+function renderQuiz() {
+  const wrap = document.getElementById('quiz-wrap');
+  wrap.innerHTML = questions.map((q, i) => `
+    <div class="q-card" id="qc-${i}">
+      <div class="q-num">Frage ${i+1} von ${questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-opts">
+        ${q.opts.map((o, j) => `<button class="q-opt" id="qo-${i}-${j}" onclick="answer(${i},${j})">${o}</button>`).join('')}
+      </div>
+      <div class="q-feedback" id="qf-${i}"></div>
+    </div>`).join('');
+  updateProg();
+}
+
+function answer(qi, oi) {
+  if (scores[qi] !== null) return;
+  const correct = oi === questions[qi].c;
+  scores[qi] = correct ? 1 : 0;
+  document.getElementById(`qo-${qi}-${oi}`).classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) document.getElementById(`qo-${qi}-${questions[qi].c}`).classList.add('correct');
+  const fb = document.getElementById(`qf-${qi}`);
+  fb.textContent = (correct ? '✓ Richtig! ' : '✗ Falsch. ') + questions[qi].exp;
+  fb.className = 'q-feedback show ' + (correct ? 'ok' : 'no');
+  document.querySelectorAll(`[id^="qo-${qi}-"]`).forEach(o => o.disabled = true);
+  document.getElementById('score').textContent = scores.filter(s => s === 1).length;
+  updateProg();
+}
+
+function updateProg() {
+  const done = scores.filter(s => s !== null).length;
+  document.getElementById('qprog').style.width = (done / questions.length * 100) + '%';
+}
+
+function resetQuiz() {
+  scores = new Array(questions.length).fill(null);
+  document.getElementById('score').textContent = 0;
+  renderQuiz();
+}
+
+renderQuiz();
+</script>
+</body>
+</html>
